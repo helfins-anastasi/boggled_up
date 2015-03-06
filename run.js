@@ -15,7 +15,8 @@ function go() {
 	for(var i = 0; i < 10; i++) {
 		currentBoard[i] = {};
 		for(var j=0; j<13;j++) {
-			currentBoard[i][j] = {letter:letters[Math.floor(Math.random()*letters.length)], color:(j===0 ? "rgb(0,180,0)" : (j===12 ? "red" : "white"))};
+			currentBoard[i][j] = {letter:letters[Math.floor(Math.random()*letters.length)], 
+					color:(j===0 ? "rgb(0,180,0)" : (j===12 ? "red" : "white"))};
 		}
 	}
 
@@ -31,8 +32,8 @@ function drawBoard() {
 			str+='<rect x="'+size*i+'" y="'+size*j;
 			str+='" width ="'+size+'" height="'+size;
 			str+='" style="fill:'+currentBoard[i][j].color;
-			str+=';stroke:black;"></rect>';			     
-//';stroke:black;" onclick="(function() {selectBoggleSquare('+i+','+j+');})();"</rect>';
+			str+=';stroke:black;" ';
+			str+='onclick="selectBoggleSquare('+i+','+j+');"></rect>';			     
 			str+='<text x="'+Math.floor(size*(i+0.2))+'" y="'+ Math.floor(size*(j+0.8))+'" font-size="20px">'+currentBoard[i][j].letter+'</text></g>'
 		str+="</g>";
 		}
@@ -42,10 +43,10 @@ function drawBoard() {
 }
 
 function makeId(i,j) {
-	return "space"+i+","+j;
+	return "space"+i+"_"+j;
 }
 
 function selectBoggleSquare(i,j) {
 	$("#"+makeId(i,j)+" > rect").css("fill", "blue");
-	return true;
+	console.log("Clicked on square "+i+", "+j);
 }
