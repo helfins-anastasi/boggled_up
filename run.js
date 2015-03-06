@@ -57,8 +57,15 @@ function makeId(i,j) {
 
 //Called when a square is selected
 function selectBoggleSquare(i,j) {
-	console.log("Clicked on square "+i+", "+j);
-	for(var x = i-1; x <= i+1; ++x) {
+	var condition = function(x,y) { return currentBoard[x][y].color === currentPlayer; };
+	var action = function(x,y) { var oldColor = currentBoard[i][j].color;
+					currentBoard[i][j].color = currentBoard[x][y].color;
+					$("#"+makeId(i,j)+" > rect").css("fill", currentBoard[i][j].color);
+					if(oldColor !== WHITE && oldColor !== currentPlayer) 
+						eraseDetachedPortion(i,j);
+				};
+	examineNeighbors(i,j,condition,action);
+/*	for(var x = i-1; x <= i+1; ++x) {
 		if(x < 0 || x >= currentBoardWidth) {
 			console.log("Past right/left side of board");
 			continue;
@@ -73,13 +80,15 @@ function selectBoggleSquare(i,j) {
 				currentBoard[i][j].color = currentBoard[x][y].color;
 				$("#"+makeId(i,j)+" > rect").css("fill", currentBoard[i][j].color);
 				console.log("Changing color");
-				eraseDetachedPortion(i,j);
+				if(oldColor !== WHITE && oldColor !== currentPlayer) {
+					eraseDetachedPortion(i,j);
+				}
 				return;
 			} else {
 				console.log("This player does not have an adjacent square");
 			}
 		}
-	}
+	}*/
 }
 
 function changePlayer() {
@@ -91,5 +100,41 @@ function changePlayer() {
 }
 
 function erasedDetachedPortion(i,j) {
+	var otherPlayer = currentPlayer === GREEN ? RED : GREEN;
+	var condition = function(x,y){ return currentBoard[x][y].color === otherPlayer; };
+	var action = function(x,y){ if(!isConnected(x,y,otherPlayer)) eraseThread(x,y,otherPlayer); };
+	examineNeighbors(i,j,condition,action);
+}
+
+//Examines the neighbors of square (i,j). If conditionFunction(x,y) is true, then actionFunction(x,y)
+function examineNeighbors(i,j,conditionFunction,actionFunction) {
+	for(var x = i-1; x <= i+1; ++x) {
+		if(x < 0 || x >= currentBoardWidth) {
+			continue;
+		} else for(var y = j-1; y <= j+1; ++y) {
+			if(y < 0 || y >= currentBoardLength) {
+				continue;
+			} else if(conditionFunction(x,y)) {
+				actionFunction(x,y);
+			}
+		}
+	}
+}
+
+function isConnected(i,j,color) {
+	var q = new Queue();
 	
+}
+
+function Queue() {
+    var items = [];
+    this.push = function(item) {
+        items.push(item);                       
+    }
+    this.pop = function() {
+        return items.shift();                                                
+    }
+    this.peek = function(){
+        return items[0];                  
+    }
 }
