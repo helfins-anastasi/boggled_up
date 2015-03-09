@@ -65,30 +65,6 @@ function selectBoggleSquare(i,j) {
 						eraseDetachedPortion(i,j);
 				};
 	examineNeighbors(i,j,condition,action);
-/*	for(var x = i-1; x <= i+1; ++x) {
-		if(x < 0 || x >= currentBoardWidth) {
-			console.log("Past right/left side of board");
-			continue;
-		} else for(var y = j-1; y <= j+1; ++y) {
-			console.log("examining space ("+x+", "+y+")");
-			if(y < 0 || y >= currentBoardLength) {
-				console.log("Past top/bottom of board");
-				continue;
-			}
-			if(currentBoard[x][y].color === currentPlayer) {
-				var oldColor = currentBoard[i][j].color;
-				currentBoard[i][j].color = currentBoard[x][y].color;
-				$("#"+makeId(i,j)+" > rect").css("fill", currentBoard[i][j].color);
-				console.log("Changing color");
-				if(oldColor !== WHITE && oldColor !== currentPlayer) {
-					eraseDetachedPortion(i,j);
-				}
-				return;
-			} else {
-				console.log("This player does not have an adjacent square");
-			}
-		}
-	}*/
 }
 
 function changePlayer() {
