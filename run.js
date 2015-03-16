@@ -22,11 +22,19 @@ function Board(width, length, player) {
 	this.length = length;
 	this.currentPlayer = player;
 	for(var i = 0; i < width; ++i) {
-		this[i] = [];
-	for(var j = 0; j < length; ++j) {
-		currentboard[i][j] = new Space(j===0 ? GREEN : (j===12 ? RED : WHITE));
+		this[i] = {"-1":null};
+		if(!this[i]) {
+			alert("waht.");
+		}
+	} for(var j = 0; j < length; ++j) {
+		if(!this[i]) {
+			alert("ERROR");
+			return;
+		}
+		this[i][j] = new Space(j===0 ? GREEN : (j===12 ? RED : WHITE));
 	}
 }
+
 
 //Place for setup that has to be done after page loads
 function go() {
