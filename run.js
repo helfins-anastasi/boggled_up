@@ -46,7 +46,7 @@ function drawBoard() {
 			str+='" style="fill:'+currentBoard[i][j].color;
 			str+=';stroke:black;" ';
 			str+='onclick="selectBoggleSquare('+i+','+j+');"></rect>';			     
-			str+='<text x="'+Math.floor(size*(i+0.2))+'" y="'+ Math.floor(size*(j+0.8))+'" font-size="20px">'+currentBoard[i][j].letter+'</text></g>'
+			str+='<text x="'+Math.floor(size*(i+0.2))+'" y="'+ Math.floor(size*(j+0.8))+'" font-size="20px">'+currentBoard[i][j].letter+'</text></g>';
 		str+="</g>";
 		}
 	}
