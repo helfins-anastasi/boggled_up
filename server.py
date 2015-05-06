@@ -19,6 +19,13 @@ def func():
 def run():
 	return f.send_file("../run.js")
 	
+@app.route("/test")
+def test():
+	return f.send_file("../test.html")
+
+@app.route("/tests.js")
+def tests_js():
+	return f.send_file("../tests.js")
 	
 if __name__ == "__main__":
 	app.run(host="0.0.0.0")
