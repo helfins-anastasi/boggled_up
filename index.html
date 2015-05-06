@@ -7,5 +7,6 @@
 </head>
 <body onload="go();">
 	<h1>Boggled Up!</h1>
+	<button onclick="$.post('/board', '', function(data,status,jqXHR){console.log(data);alert(status);}, 'json')">POST</button>
 </body>
 </html>
