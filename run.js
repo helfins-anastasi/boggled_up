@@ -1,3 +1,5 @@
+/* global currentBoardLength */
+/* global currentBoardWidth */
 /* global currentBoard */
 /* global $ */
 /* global WHITE */
@@ -38,9 +40,10 @@ function Space(letter, color) {
 }
 
 currentBoard = {};
+currentBoardWidth = 10, currentBoardLength = 13, currentPlayer = GREEN;
 
 function getBoard() {
-	var width = 10, height = 13;
+	var width = currentBoardWidth, height = currentBoardLength;
 	
 	function successFunction(data, textStatus, jqXHR) {
 		console.log(textStatus);
@@ -72,7 +75,7 @@ function getBoard() {
 		goPart2();
 	}
 	
-	$.ajax("/", {data: { width:width, height:height},
+	$.ajax("/", {data: {width:width, height:height, player:0},
 						method: "PUT",
 						type: "PUT", 
 						success: successFunction});

@@ -15,8 +15,6 @@ for letter in letterFrequencies:
 def randomLetter():
 	return r.choice(lettersForSampling)
 
-board = None
-
 def getBoard(width,height):
 	global board
 	
@@ -28,13 +26,29 @@ def getBoard(width,height):
 		for j in range(height):
 			board[i].append(randomLetter())
 	return board
+
+class Player:
+	spaces = []
+	def __init__(self, startRow, width):
+		for i in (range(width)):
+			self.spaces.append((i, startRow, board[i][startRow]))
+
+board = None
+players = {}
 	
 def boardLoad():
-	temp = getBoard(int(f.request.form['width']),int(f.request.form['height']))
+	width = int(f.request.form['width'])
+	height = int(f.request.form['height'])
+	ind = int(f.request.form['player'])
+	temp = getBoard(width, height)
+	players[ind] = Player(ind, width)
 	return json.dumps(temp)
 	
 	
-				
+	
+	
+
+
 
 @app.route("/", methods=['GET', 'PUT'])
 def mainPage():
@@ -42,7 +56,19 @@ def mainPage():
 		return boardLoad()
 	else:
 		return f.send_file("index.html")
-	
+
+@app.route("/move", methods=['PUT'])
+def makeMove():
+	player = int(f.request.form['player'])
+	moves = f.request.form['moves']
+	for i in moves:
+		x = int(moves[i]['x'])
+		y = int(moves[i]['y'])
+		char = int(moves[i]['char'])
+		if(board[x][y] != char):
+			return json.dumps({"status":"failed", "error": "board does not match", "x":x, "y":y})
+		players[player].spaces.append((x,y,char))
+
 @app.route("/favicon.ico")
 def func():
 	return f.send_file("favicon.ico")
