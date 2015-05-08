@@ -1,17 +1,15 @@
-//Set up letter selection system
-englishLetterFrequencies = {"a":82,"b":15,"c":28,"d":43,"e":127,"f":22,"g":20,"h":61,"i":70,"j":2,"k":8,"l":40,"m":24,"n":67,"o":75,"p":19,"q":1,"r":60,"s":63,"t":91,"u":28,"v":10,"w":24,"x":2,"y":20,"z":1}
-lettersForSampling = [];
-for(var letter in englishLetterFrequencies){
-	for(var i = 0; i < englishLetterFrequencies[letter]; i++) {
-		lettersForSampling.push(letter);
-	}
-}
+/* global currentBoard */
+/* global $ */
+/* global WHITE */
+/* global GREEN */
+/* global RED */
+
 
 //Set up colors
 RED = "rgb(230,0,0)", GREEN = "rgb(0,180,0)", WHITE = "white";
 
 //Set up current board
-currentBoard = {};
+/*currentBoard = {};
 currentBoardWidth = 10;
 currentBoardLength = 13;
 currentPlayer = GREEN;
@@ -25,11 +23,69 @@ for(var i = 0; i < currentBoardWidth; ++i) {
 
 function randomLetter() {
 	return lettersForSampling[Math.floor(Math.random()*lettersForSampling.length)];
+}*/
+
+function Space(letter, color) {
+	this.letter = letter;
+	this.color = color;
+	this.flipped = false;
+	this.flip = function(val) { //Bool parameter, optional
+		if(val !== undefined)
+			this.flipped = val;
+		else
+			this.flipped = !this.flipped;
+	};
+}
+
+currentBoard = {};
+
+function getBoard() {
+	var width = 10, height = 13;
+	
+	function successFunction(data, textStatus, jqXHR) {
+		console.log(textStatus);
+		console.log(data);
+		
+		data = JSON.parse(data);
+		
+		for(var i = 0; i < width; i++) {
+		//for(var i in data) {
+			if(!data[i]) {
+				console.log("data["+i+"] DNE");
+				continue;
+			}
+			if(currentBoard == undefined)
+				currentBoard = {};
+			currentBoard[i] = {};
+			
+			for(var j = 0; j < height; j++) {
+			//for(var j in data) {
+				if(!data[i][j]) {
+					console.log("data["+i+"]["+j+"] DNE");
+				}
+				currentBoard[i][j] = new Space(data[i][j], 
+								(j===0 ? GREEN : 
+								(j===height-1 ? RED : WHITE)));
+			}
+		}
+		console.log(currentBoard);
+		goPart2();
+	}
+	
+	$.ajax("/", {data: { width:width, height:height},
+						method: "PUT",
+						type: "PUT", 
+						success: successFunction});
 }
 
 //Place for setup that has to be done after page loads
 function go() {
 //	console.log("Code is running");
+	currentBoard = getBoard();
+	console.log("Loading...");
+}
+
+function goPart2() {
 	drawBoard();
 	$("body").append('<button id="changePlayer" onclick="changePlayer();">change player</button>');
 }
@@ -114,7 +170,7 @@ function Queue() {
     this.pop = function() {
         return items.shift();                                                
     }
-    this.peek = function(){
+    this.peek = function() {
         return items[0];                  
     }
 }

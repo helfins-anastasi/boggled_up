@@ -15,7 +15,13 @@ for letter in letterFrequencies:
 def randomLetter():
 	return r.choice(lettersForSampling)
 
+board = None
+
 def getBoard(width,height):
+	global board
+	
+	if board != None and width == len(board) and height == len(board[0]):
+		return board
 	board = []
 	for i in range(width):
 		board.append([])
@@ -23,17 +29,19 @@ def getBoard(width,height):
 			board[i].append(randomLetter())
 	return board
 	
+def boardLoad():
+	temp = getBoard(int(f.request.form['width']),int(f.request.form['height']))
+	return json.dumps(temp)
 	
 	
 				
 
-@app.route("/")
+@app.route("/", methods=['GET', 'PUT'])
 def mainPage():
-	return f.send_file("index.html")
-	
-@app.route("/board", methods=['POST'])
-def board():
-	return json.dumps(getBoard(10,13))
+	if f.request.method == 'PUT':
+		return boardLoad()
+	else:
+		return f.send_file("index.html")
 	
 @app.route("/favicon.ico")
 def func():
