@@ -24,7 +24,9 @@ def getBoard(width,height):
 	for i in range(width):
 		board.append([])
 		for j in range(height):
-			board[i].append(randomLetter())
+			board[i].append({"letter": randomLetter(), "player": -1})
+			if j == 0 or j == height-1:
+				board[i][j]["player"] = j
 	return board
 
 class Player:
@@ -42,15 +44,15 @@ def boardLoad(width, height, ind):
 	return json.dumps(temp)
 	
 def makeMove(player, moves):
-	print("in makeMove "+str(player))
 	changes = []
 	for i in range(int(len(moves)/3)):
 		x = int(moves[3*i])
 		y = int(moves[3*i+1])
 		char = moves[3*i+2]
-		if(board[x][y] != char):
+		if(board[x][y]["letter"] != char):
 			return json.dumps({"status":"failed", "error": "board does not match", "x":x, "y":y})
 		players[player].spaces.append((x,y,char))
+		board[x][y]["player"] = player
 		changes.append({"x":x, "y":y, "letter":char, "player":player})
 	return json.dumps({"status":"success", "changes":json.dumps(changes)})	
 	return json.dumps("[1,2,3]")

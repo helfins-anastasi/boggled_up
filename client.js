@@ -50,6 +50,7 @@ currentBoard = {};
 currentBoardWidth = 10, currentBoardLength = 13, currentPlayer = 0;
 currentMove = [];
 colorTransform = {};
+colorTransform[-1] = WHITE;
 colorTransform[0] = GREEN;
 colorTransform[currentBoardLength-1] = RED;
 brighten = {};
@@ -82,15 +83,15 @@ function getBoard() {
 				if(!data[i][j]) {
 					console.log("data["+i+"]["+j+"] DNE");
 				}
-				currentBoard[i][j] = new Space(data[i][j], 
-								(j===0 ? GREEN : (j===height-1 ? RED : WHITE)),
+				currentBoard[i][j] = new Space(data[i][j]["letter"], 
+								colorTransform[data[i][j]["player"]],
 								i,j);
 			}
 		}
 		goPart2();
 	}
 	
-	$.ajax("/", {data: {width:width, height:height, player:0},
+	$.ajax("/", {data: {type:"new", width:width, height:height, player:0},
 						method: "PUT",
 						type: "PUT", 
 						success: successFunction});
