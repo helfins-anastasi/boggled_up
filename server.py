@@ -71,11 +71,8 @@ def mainPage():
 @app.route("/move", methods=['GET','PUT'])
 def makeMoveFunctionThingy():
 	if(f.request.method == 'PUT'):
-		print("called w/ PUT")
 		playerVar = f.request.form['player']
-		print("player: "+playerVar)
 		movesVar = f.request.form['moves']
-		print("movesVar: "+movesVar)
 		return makeMove(int(playerVar), json.loads(movesVar))
 
 	else:
@@ -86,9 +83,9 @@ def makeMoveFunctionThingy():
 def favicon_ico():
 	return f.send_file("favicon.ico")
 	
-@app.route("/run.js")
+@app.route("/client.js")
 def run():
-	return f.send_file("run.js")
+	return f.send_file("client.js")
 	
 @app.route("/test")
 def test():
