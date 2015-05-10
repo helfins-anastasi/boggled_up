@@ -36,41 +36,54 @@ class Player:
 board = None
 players = {}
 	
-def boardLoad():
-	width = int(f.request.form['width'])
-	height = int(f.request.form['height'])
-	ind = int(f.request.form['player'])
+def boardLoad(width, height, ind):
 	temp = getBoard(width, height)
 	players[ind] = Player(ind, width)
 	return json.dumps(temp)
 	
+def makeMove(player, moves):
+	print("in makeMove "+str(player))
+	changes = []
+	for i in range(int(len(moves)/3)):
+		x = int(moves[3*i])
+		y = int(moves[3*i+1])
+		char = moves[3*i+2]
+		if(board[x][y] != char):
+			return json.dumps({"status":"failed", "error": "board does not match", "x":x, "y":y})
+		players[player].spaces.append((x,y,char))
+		changes.append({"x":x, "y":y, "letter":char, "player":player})
+	return json.dumps({"status":"success", "changes":json.dumps(changes)})	
+	return json.dumps("[1,2,3]")
+
 	
-	
-	
+##################################################	
 
 
 
 @app.route("/", methods=['GET', 'PUT'])
 def mainPage():
 	if f.request.method == 'PUT':
-		return boardLoad()
+		return boardLoad(int(f.request.form['width']), int(f.request.form['height']), 
+						 int(f.request.form['player']) )
 	else:
 		return f.send_file("index.html")
 
-@app.route("/move", methods=['PUT'])
-def makeMove():
-	player = int(f.request.form['player'])
-	moves = f.request.form['moves']
-	for i in moves:
-		x = int(moves[i]['x'])
-		y = int(moves[i]['y'])
-		char = int(moves[i]['char'])
-		if(board[x][y] != char):
-			return json.dumps({"status":"failed", "error": "board does not match", "x":x, "y":y})
-		players[player].spaces.append((x,y,char))
+@app.route("/move", methods=['GET','PUT'])
+def makeMoveFunctionThingy():
+	if(f.request.method == 'PUT'):
+		print("called w/ PUT")
+		playerVar = f.request.form['player']
+		print("player: "+playerVar)
+		movesVar = f.request.form['moves']
+		print("movesVar: "+movesVar)
+		return makeMove(int(playerVar), json.loads(movesVar))
+
+	else:
+		print ("called with GET")
+		return f.send_file("index.html")
 
 @app.route("/favicon.ico")
-def func():
+def favicon_ico():
 	return f.send_file("favicon.ico")
 	
 @app.route("/run.js")
