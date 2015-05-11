@@ -115,8 +115,6 @@ function getBoard(id) { //Optional parameter, if undefined then get a new board
 		dataObj.height = currentBoardLength;
 	}
 	
-	console.log(dataObj);
-	
 	$.ajax("/", {data: dataObj, method: "PUT", type: "PUT", 
 					success: successFunction});
 }
@@ -176,23 +174,15 @@ function makeId(i,j) {
 //	If conditionFunction(x,y) is true, then actionFunction(x,y). 
 //	If actionFunction(x,y) returns a truthy value, then the function exits.
 function examineNeighbors(i,j,conditionFunction,actionFunction) {
-	console.log("in examineNeighbors");
 	for(var x = i-1; x <= i+1; ++x) {
-		console.log("outer loop; x="+x);
 		if(x < 0 || x >= currentBoardLength) {
-			console.log("continue");
 			continue;
 		} else for(var y = j-1; y <= j+1; ++y) {
-			console.log("inner loop; y="+y);
 			if(y < 0 || y >= currentBoardWidth) {
-				console.log("continue");
 				continue;
 			} else if(conditionFunction(x,y)) {
-				console.log("condition true");
 				if(actionFunction(x,y)) return;
-			} else {
-				console.log("condition false");
-			}
+			} 
 		}
 	}
 }
@@ -217,10 +207,8 @@ function selectSpace(i,j) {
 }
 
 function selectBoggleSquare(i,j) {
-	console.log("in selectBoggleSquare("+i+", "+j+")");
 	//In the case that we have no move yet
 	if(currentMove.length == 0) {
-		console.log("First letter of move")
 		//If the selected square is our color, start the move
 		if(currentBoard[i][j].player == currentPlayer) {
 			selectSpace(i,j);
@@ -231,7 +219,6 @@ function selectBoggleSquare(i,j) {
 	}
 	//In the case we select something in our start
 	if(i == currentPlayer) {
-		console.log("Selected in our start");
 		//If it's in the move
 		if($.inArray(currentBoard[i][j], currentMove) >= 0) {
 			unselect(i,j);
@@ -246,22 +233,18 @@ function selectBoggleSquare(i,j) {
 		return;
 	} else if(currentBoard[i][j].player == currentPlayer) { 
 		//If we select something not in our start that is also our color
-		console.log("Already our color");
 		unselect(i,j);
 		return;
 	}
 	
-	console.log("base case");
 	
 	var conditionFunction = function(x,y) {
 		var result = (x === currentMove[currentMove.length-1].x && 
 					y === currentMove[currentMove.length-1].y); 
-		console.log("conditionFunction("+x+', '+y+") returns " + result);
 		return result;
 	}
 	
 	var actionFunction = function(x,y) { 
-		console.log("reached action");
 		if(currentBoard[i][j].flip()) { //If space was not made white
 			selectSpace(i,j);
 		} else { //If space is now white
@@ -270,7 +253,6 @@ function selectBoggleSquare(i,j) {
 		currentBoard[i][j].redraw(); //Update the visible color 
 		return true;
 	};
-	console.log("calling examineNeighbors");
 	examineNeighbors(i,j,conditionFunction, actionFunction);
 }
 
@@ -322,7 +304,6 @@ function submitMove() {
 	}
 	var dataObj = {};
 	dataObj["moves"] = JSON.stringify(encodeMove(currentMove));
-	console.log(dataObj["moves"]);
 	dataObj["player"] = currentPlayer;
 	dataObj["id"] = currentBoardId;
 	$.ajax("/move", {data: dataObj, method: "PUT",
