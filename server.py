@@ -16,46 +16,67 @@ def randomLetter():
 	return r.choice(lettersForSampling)
 
 def getBoard(width,height):
-	global board
-	
-	if board != None and width == len(board) and height == len(board[0]):
-		return board
 	board = []
-	for i in range(width):
+	for i in range(height):
 		board.append([])
-		for j in range(height):
-			board[i].append({"letter": randomLetter(), "player": -1})
-			if j == 0 or j == height-1:
-				board[i][j]["player"] = j
-	return board
+		if i == 0 or i == height-1:
+			temp = i
+		else:
+			temp = -1
+		for j in range(width):
+			board[i].append({"letter": randomLetter(), "player": temp})
+			
+	boards.append(board);
+	return {"board":board, "id":(len(boards)-1)}
 
-class Player:
-	spaces = []
-	def __init__(self, startRow, width):
-		for i in (range(width)):
-			self.spaces.append((i, startRow, board[i][startRow]))
+#class Player:
+#	spaces = []
+#	def __init__(self, startRow, width):
+#		for i in (range(width)):
+#			self.spaces.append((i, startRow, board[i][startRow]))
 
-board = None
-players = {}
+# players = {}
+boards = []
 	
-def boardLoad(width, height, ind):
-	temp = getBoard(width, height)
-	players[ind] = Player(ind, width)
-	return json.dumps(temp)
+#def boardLoad(width, height):
+#	temp = getBoard(width, height)
+#	return json.dumps(temp)
 	
-def makeMove(player, moves):
+def printPlayerBoard(ind):
+	print ("in printPlayerBoard")
+	board = boards[ind]
+	print("got the board")
+	print("len(board) = "+len(board));
+	for i in len(board):
+		print("in outer loop "+str(i))
+		string = "";
+		for j in len(board[i]):
+			print("in inner loop "+str(j))
+			string += board[i][j]['player']
+			string += '\t'
+		print(string)
+	
+def makeMove(player, moves, boardId):
+#	print("in makeMove()")
 	changes = []
-	for i in range(int(len(moves)/3)):
+	for i in range(len(moves)//3):
+#		print("outer loop iteration "+str(i))
 		x = int(moves[3*i])
+#		x = int(moves[i].x)
 		y = int(moves[3*i+1])
+#		y = int(moves[i].y)
 		char = moves[3*i+2]
-		if(board[x][y]["letter"] != char):
+#		char = moves[i].char
+		if(boards[boardId][x][y]["letter"] != char):
+			print("makeMove() failed")
 			return json.dumps({"status":"failed", "error": "board does not match", "x":x, "y":y})
-		players[player].spaces.append((x,y,char))
-		board[x][y]["player"] = player
+			
+		boards[boardId][x][y]["player"] = player
 		changes.append({"x":x, "y":y, "letter":char, "player":player})
+
+#		printPlayerBoard(boardId)
 	return json.dumps({"status":"success", "changes":json.dumps(changes)})	
-	return json.dumps("[1,2,3]")
+
 
 	
 ##################################################	
@@ -65,18 +86,24 @@ def makeMove(player, moves):
 @app.route("/", methods=['GET', 'PUT'])
 def mainPage():
 	if f.request.method == 'PUT':
-		return boardLoad(int(f.request.form['width']), int(f.request.form['height']), 
-						 int(f.request.form['player']) )
+		kind = f.request.form['type']
+		if kind == 'new':
+			width = f.request.form['width']
+			height = f.request.form['height']
+			return json.dumps(getBoard(int(width), int(height)))
+		elif kind == 'refresh':
+			index = f.request.form['id']
+			return json.dumps(boards[int(index)])
 	else:
 		return f.send_file("index.html")
 
 @app.route("/move", methods=['GET','PUT'])
 def makeMoveFunctionThingy():
 	if(f.request.method == 'PUT'):
-		playerVar = f.request.form['player']
+		idVar = f.request.form['id']
 		movesVar = f.request.form['moves']
-		return makeMove(int(playerVar), json.loads(movesVar))
-
+		playerVar = f.request.form['player']
+		return makeMove(int(playerVar), json.loads(movesVar), int(idVar))
 	else:
 		print ("called with GET")
 		return f.send_file("index.html")

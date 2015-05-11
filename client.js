@@ -1,3 +1,5 @@
+/* global player */
+/* global currentBoardId */
 /* global darken */
 /* global brighten */
 /* global BRIGHT_GREEN */
@@ -21,22 +23,30 @@ RED = "rgb(230,0,0)", GREEN = "rgb(0,180,0)", WHITE = "white";
 BRIGHT_RED = "rgb(255, 0, 0)", BRIGHT_GREEN = "rgb(0,230,0)";
 
 //A class for each space
-function Space(letter, color, x, y) {
+function Space(letter, player, x, y) {
 	this.letter = letter;
-	this.color = color;
+	this.player = player;
+	this.setPlayer = function(val) {
+		this.player = val;
+		this.color = colorTransform[val];
+	}
+	this.color = colorTransform[player];
 	this.x = x;
 	this.y = y;
 	this.flipped = false;
 	this.flip = function(val) { //Bool parameter, optional (if undefined, flipped is toggled and color is assigned based on colorTransform[currentPlayer])
 		if(val !== undefined) {
 			this.flipped = val != WHITE;
-			this.color = val;	
+			this.color = val;
+			this.player = player[val];
 		} else {
 			this.flipped = !this.flipped;
 			if(this.color == WHITE) {
 				this.color = brighten[colorTransform[currentPlayer]];
+				this.player = currentPlayer;
 			} else {
 				this.color = WHITE;
+				this.player = player[WHITE];
 			}
 		}
 		return this.color != WHITE;
@@ -47,54 +57,68 @@ function Space(letter, color, x, y) {
 }
 
 currentBoard = {};
+currentBoardId = undefined;
 currentBoardWidth = 10, currentBoardLength = 13, currentPlayer = 0;
 currentMove = [];
+
 colorTransform = {};
 colorTransform[-1] = WHITE;
 colorTransform[0] = GREEN;
 colorTransform[currentBoardLength-1] = RED;
+
 brighten = {};
 brighten[GREEN] = BRIGHT_GREEN;
 brighten[RED] = BRIGHT_RED;
+
 darken = {};
 darken[BRIGHT_GREEN] = GREEN;
 darken[BRIGHT_RED] = RED;
 
-//player = {GREEN:0, RED:(currentBoardLength-1)};
+player = {};
+player[WHITE] = -1;
+player[GREEN] = 0;
+player[BRIGHT_GREEN] = 0;
+player[RED] = currentBoardLength - 1;
+player[BRIGHT_RED] = currentBoardLength - 1;
 
-function getBoard() {
-	var width = currentBoardWidth, height = currentBoardLength;
-	
-	function successFunction(data, textStatus, jqXHR) {		
+
+function getBoard(id) { //Optional parameter, if undefined then get a new board
+	function successFunction(data, textStatus, jqXHR) {
 		data = JSON.parse(data);
 		
-		for(var i = 0; i < width; i++) {
-		//for(var i in data) {
-			if(!data[i]) {
-				console.log("data["+i+"] DNE");
-				continue;
-			}
-			if(currentBoard == undefined)
-				currentBoard = {};
-			currentBoard[i] = {};
+		currentBoardId = data['id'];
+		var tempBoard = data['board'];
+		
+		for(var i = 0; i < currentBoardLength; i++) {
+			if(!tempBoard[i]) { console.log("tempBoard["+i+"] DNE"); continue; }
+			if(currentBoard == undefined) currentBoard = {};
 			
-			for(var j = 0; j < height; j++) {
-			//for(var j in data) {
-				if(!data[i][j]) {
-					console.log("data["+i+"]["+j+"] DNE");
-				}
-				currentBoard[i][j] = new Space(data[i][j]["letter"], 
-								colorTransform[data[i][j]["player"]],
+			currentBoard[i] = {};
+			for(var j = 0; j < currentBoardWidth; j++) {
+				if(!tempBoard[i][j]) { console.log("tempBoard["+i+"]["+j+"] DNE"); continue; }
+				
+				currentBoard[i][j] = new Space(tempBoard[i][j]["letter"], 
+								tempBoard[i][j]["player"],
 								i,j);
 			}
 		}
 		goPart2();
 	}
 	
-	$.ajax("/", {data: {type:"new", width:width, height:height, player:0},
-						method: "PUT",
-						type: "PUT", 
-						success: successFunction});
+	var dataObj = {};
+	if(id) {
+		dataObj.type = "refresh";
+		dataObj.id = id;
+	} else {
+		dataObj.type = "new";	
+		dataObj.width = currentBoardWidth;
+		dataObj.height = currentBoardLength;
+	}
+	
+	console.log(dataObj);
+	
+	$.ajax("/", {data: dataObj, method: "PUT", type: "PUT", 
+					success: successFunction});
 }
 
 //Place for setup that has to be done after page loads
@@ -125,16 +149,16 @@ function addLetter(letter) {
 //Draws the board
 function drawBoard() {
 	var size = 30;
-	var str = '<svg id="svg" width="'+10*size+'" height="'+13*size+'">';
-	for(var i = 0; i < 10; i++) {
-		for(var j = 0; j < 13; j++) {
+	var str = '<svg id="svg" width="'+currentBoardWidth*size+'" height="'+currentBoardLength*size+'">';
+	for(var i = 0; i < currentBoardLength; i++) {
+		for(var j = 0; j < currentBoardWidth; j++) {
 			str+='<g id="'+makeId(i,j)+'">';
-			str+='<rect x="'+size*i+'" y="'+size*j;
+			str+='<rect x="'+size*j+'" y="'+size*i;
 			str+='" width ="'+size+'" height="'+size;
 			str+='" style="fill:'+currentBoard[i][j].color;
 			str+=';stroke:black;" ';
 			str+='onclick="selectBoggleSquare('+i+','+j+');"></rect>';			     
-			str+='<text x="'+Math.floor(size*(i+0.2))+'" y="'+ Math.floor(size*(j+0.8))+'" font-size="20px" ';
+			str+='<text x="'+Math.floor(size*(j+0.2))+'" y="'+ Math.floor(size*(i+0.8))+'" font-size="20px" ';
 			str+='onclick="selectBoggleSquare('+i+','+j+');">'+currentBoard[i][j].letter+'</text></g>';
 		str+="</g>";
 		}
@@ -152,14 +176,22 @@ function makeId(i,j) {
 //	If conditionFunction(x,y) is true, then actionFunction(x,y). 
 //	If actionFunction(x,y) returns a truthy value, then the function exits.
 function examineNeighbors(i,j,conditionFunction,actionFunction) {
+	console.log("in examineNeighbors");
 	for(var x = i-1; x <= i+1; ++x) {
-		if(x < 0 || x >= currentBoardWidth) {
+		console.log("outer loop; x="+x);
+		if(x < 0 || x >= currentBoardLength) {
+			console.log("continue");
 			continue;
 		} else for(var y = j-1; y <= j+1; ++y) {
-			if(y < 0 || y >= currentBoardLength) {
+			console.log("inner loop; y="+y);
+			if(y < 0 || y >= currentBoardWidth) {
+				console.log("continue");
 				continue;
 			} else if(conditionFunction(x,y)) {
+				console.log("condition true");
 				if(actionFunction(x,y)) return;
+			} else {
+				console.log("condition false");
 			}
 		}
 	}
@@ -168,7 +200,7 @@ function examineNeighbors(i,j,conditionFunction,actionFunction) {
 function unselect(i,j) {
 	while(currentMove.length > 0) {
 		var popped = currentMove.pop();
-		if(popped.y != currentPlayer) {
+		if(popped.x != currentPlayer) {
 			popped.flip(WHITE);
 		} else {
 			popped.flip(colorTransform[currentPlayer]);
@@ -185,10 +217,12 @@ function selectSpace(i,j) {
 }
 
 function selectBoggleSquare(i,j) {
+	console.log("in selectBoggleSquare("+i+", "+j+")");
 	//In the case that we have no move yet
 	if(currentMove.length == 0) {
+		console.log("First letter of move")
 		//If the selected square is our color, start the move
-		if(currentBoard[i][j].color == colorTransform[currentPlayer]) {
+		if(currentBoard[i][j].player == currentPlayer) {
 			selectSpace(i,j);
 			currentBoard[i][j].flip(brighten[colorTransform[currentPlayer]]);
 			currentBoard[i][j].redraw();
@@ -196,7 +230,8 @@ function selectBoggleSquare(i,j) {
 		return;
 	}
 	//In the case we select something in our start
-	if(j == currentPlayer) {
+	if(i == currentPlayer) {
+		console.log("Selected in our start");
 		//If it's in the move
 		if($.inArray(currentBoard[i][j], currentMove) >= 0) {
 			unselect(i,j);
@@ -209,19 +244,24 @@ function selectBoggleSquare(i,j) {
 			currentBoard[i][j].redraw();
 		}
 		return;
-	} else if(currentBoard[i][j].color == colorTransform[currentPlayer]) { 
+	} else if(currentBoard[i][j].player == currentPlayer) { 
 		//If we select something not in our start that is also our color
+		console.log("Already our color");
 		unselect(i,j);
 		return;
 	}
 	
+	console.log("base case");
 	
-	var conditionFunction = function(x,y) { 
-		return x === currentMove[currentMove.length-1].x && 
-				y === currentMove[currentMove.length-1].y; 
+	var conditionFunction = function(x,y) {
+		var result = (x === currentMove[currentMove.length-1].x && 
+					y === currentMove[currentMove.length-1].y); 
+		console.log("conditionFunction("+x+', '+y+") returns " + result);
+		return result;
 	}
 	
 	var actionFunction = function(x,y) { 
+		console.log("reached action");
 		if(currentBoard[i][j].flip()) { //If space was not made white
 			selectSpace(i,j);
 		} else { //If space is now white
@@ -230,11 +270,13 @@ function selectBoggleSquare(i,j) {
 		currentBoard[i][j].redraw(); //Update the visible color 
 		return true;
 	};
+	console.log("calling examineNeighbors");
 	examineNeighbors(i,j,conditionFunction, actionFunction);
 }
 
 function changePlayer() {
 	currentMove = [];
+	$("#selectedWord")[0].innerHTML = "";
 	if(currentPlayer === 0) {
 		currentPlayer = currentBoardLength-1;
 	} else {
@@ -262,13 +304,27 @@ function submitMove() {
 			alert("We're sorry, something has gone wrong. Please reload the page.");
 			return;
 		}
-		console.log(data);
+		data.changes = JSON.parse(data.changes);
+		for(var i in data.changes) {
+			var x = data.changes[i].x;
+			var y = data.changes[i].y;
+			var letter = data.changes[i].letter;
+			var player = data.changes[i].player;
+			if(currentBoard[x][y].letter !== letter) {
+				alert("Whoa, the internal state is DEFINITELY wrong. Try reloading?");
+				return;
+			}
+			//#################### FINISH THIS
+			currentBoard[x][y].setPlayer(player);
+			currentBoard[x][y].redraw();
+		}
 		changePlayer();
 	}
 	var dataObj = {};
 	dataObj["moves"] = JSON.stringify(encodeMove(currentMove));
 	console.log(dataObj["moves"]);
 	dataObj["player"] = currentPlayer;
+	dataObj["id"] = currentBoardId;
 	$.ajax("/move", {data: dataObj, method: "PUT",
 						type: "PUT", 
 						success: successFunction});
