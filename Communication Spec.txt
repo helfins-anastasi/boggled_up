@@ -1,0 +1,44 @@
+Communication Spec
+==================
+uri: '/', method: 'PUT'
+	type = "new"
+		> width = {int}
+		> height = {int}
+	type = "refresh"
+		> id = {int}
+	< JSON blob 
+		< board = {2D array}
+			< letter = {char}
+			< player = {int, default = -1}
+		< id = {int}
+			
+uri: '/move', method: 'PUT'
+	> id = {int}
+	> player = {int}
+	> moves = {Array}
+		> moves[3 * i] = x = {int} 
+		> moves[3*i+1] = y = {int} #coordinates in board
+		> moves[3*i+2] = char = {char}
+	< JSON blob
+		~ status = "failed":
+			< error = {string}
+			< x = {int}
+			< y = {int}
+		~ status = "success":
+			< changes = {JSON blob array}
+				< x = {int}
+				< y = {int} #coordinates
+				< letter = {char}
+				< player = {int}
+		
+		
+		
+		#################
+		
+		
+		
+		> x = {int}
+		> y = {int} # cooridnates in board
+		> index = {int} # index in word
+		> char = {char}
+		

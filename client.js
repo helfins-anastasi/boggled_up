@@ -29,21 +29,23 @@ function Space(letter, player, x, y) {
 	this.setPlayer = function(val) {
 		this.player = val;
 		this.color = colorTransform[val];
+		this.tempPlayer = false;
 	}
 	this.color = colorTransform[player];
 	this.x = x;
 	this.y = y;
+	this.tempPlayer = false;
 	this.flipped = false;
 	this.flip = function(val) { //Bool parameter, optional (if undefined, flipped is toggled and color is assigned based on colorTransform[currentPlayer])
 		if(val !== undefined) {
 			this.flipped = val != WHITE;
 			this.color = val;
-			this.player = player[val];
+			this.tempPlayer = player[val];
 		} else {
 			this.flipped = !this.flipped;
 			if(this.color == WHITE) {
 				this.color = brighten[colorTransform[currentPlayer]];
-				this.player = currentPlayer;
+				this.tempPlayer = currentPlayer;
 			} else {
 				this.color = WHITE;
 				this.player = player[WHITE];
