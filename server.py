@@ -29,19 +29,8 @@ def getBoard(width,height):
 	boards.append(board);
 	return {"board":board, "id":(len(boards)-1)}
 
-#class Player:
-#	spaces = []
-#	def __init__(self, startRow, width):
-#		for i in (range(width)):
-#			self.spaces.append((i, startRow, board[i][startRow]))
-
-# players = {}
 boards = []
-	
-#def boardLoad(width, height):
-#	temp = getBoard(width, height)
-#	return json.dumps(temp)
-	
+		
 def printPlayerBoard(ind):
 	print ("in printPlayerBoard")
 	board = boards[ind]
@@ -57,16 +46,11 @@ def printPlayerBoard(ind):
 		print(string)
 	
 def makeMove(player, moves, boardId):
-#	print("in makeMove()")
 	changes = []
 	for i in range(len(moves)//3):
-#		print("outer loop iteration "+str(i))
 		x = int(moves[3*i])
-#		x = int(moves[i].x)
 		y = int(moves[3*i+1])
-#		y = int(moves[i].y)
 		char = moves[3*i+2]
-#		char = moves[i].char
 		if(boards[boardId][x][y]["letter"] != char):
 			print("makeMove() failed")
 			return json.dumps({"status":"failed", "error": "board does not match", "x":x, "y":y})
@@ -105,7 +89,6 @@ def makeMoveFunctionThingy():
 		playerVar = f.request.form['player']
 		return makeMove(int(playerVar), json.loads(movesVar), int(idVar))
 	else:
-		print ("called with GET")
 		return f.send_file("index.html")
 
 @app.route("/favicon.ico")
