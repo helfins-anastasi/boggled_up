@@ -77,7 +77,7 @@ def mainPage():
 			return json.dumps(getBoard(int(width), int(height)))
 		elif kind == 'refresh':
 			index = f.request.form['id']
-			return json.dumps(boards[int(index)])
+			return json.dumps({"board":boards[int(index)], "id":index})
 	else:
 		return f.send_file("index.html")
 

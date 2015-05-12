@@ -105,6 +105,7 @@ function getBoard(id) { //Optional parameter, if undefined then get a new board
 			}
 		}
 		goPart2();
+		$("#boardNumber").val(currentBoardId);
 	}
 	
 	var dataObj = {};
@@ -123,14 +124,19 @@ function getBoard(id) { //Optional parameter, if undefined then get a new board
 
 //Place for setup that has to be done after page loads
 function go() {
-	currentBoard = getBoard();
+	//currentBoard = getBoard();
+	getBoard();
 	console.log("Loading...");
 }
 
 function goPart2() {
 	drawBoard();
-	$("body").append('<p id="selectedWord" style="font:20px bold;display:inline;margin:-200px 20px 0 20px;"> </p>')
-	$("body").append('<button id="submitMove" onclick="submitMove();">Submit Move!</button>');
+//	if(!($("body").has("#selectedWord"))) {
+		$("body").append('<p id="selectedWord" style="font:20px bold;display:inline;margin:-200px 20px 0 20px;"> </p>')
+		$("body").append('<button id="submitMove" onclick="submitMove();">Submit Move!</button>');
+		$("body").append('<input type="text" id="boardNumber"></input>');
+		$("body").append('<button id="load board" onclick="loadBoard();">Load board</button>');
+//	}
 }
 
 function removeLetter(letter) {
@@ -140,6 +146,10 @@ function removeLetter(letter) {
 	} else {
 		alert("Whoa, the internal state is DEFINITELY wrong. Try reloading?");
 	}
+}
+
+function loadBoard() {
+	getBoard($("#boardNumber").val());
 }
 
 function addLetter(letter) {
@@ -247,10 +257,11 @@ function selectBoggleSquare(i,j) {
 	}
 	
 	var actionFunction = function(x,y) { 
-		if(currentBoard[i][j].flip()) { //If space was not made white
+		if(currentBoard[i][j].player == player[WHITE]) { //If space was not made white
+			currentBoard[i][j].flip();
 			selectSpace(i,j);
-		} else { //If space is now white
-			unselect(i,j);
+		} else if(currentBoard[i][j].player == currentPlayer) {
+			
 		}
 		currentBoard[i][j].redraw(); //Update the visible color 
 		return true;
