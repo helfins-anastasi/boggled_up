@@ -119,36 +119,32 @@ function examineNeighbors(i,j,conditionFunction,actionFunction) {
 }
 
 function selectBoggleSquare(i,j) {
+	//In the case that it is already selected
+	if(currentBoard[i][j].tempPlayer != false) {
+		unselect(i,j);
+	}
+	
 	//In the case that we have no move yet
 	if(currentMove.length == 0) {
 		//If the selected square is our color, start the move
 		if(currentBoard[i][j].player == currentPlayer) {
-			selectSpace(i,j);
-			currentBoard[i][j].flip(brighten[colorTransform[currentPlayer]]);
-			currentBoard[i][j].redraw();
+			if(currentBoard[i][j].tempPlayer == false) {
+				selectSpace(i,j);
+			}
 		}
-		return;
-	}
-	//In the case we select something in our start
-	if(i == currentPlayer) {
-		//If it's in the move
-		if($.inArray(currentBoard[i][j], currentMove) >= 0) {
-			unselect(i,j);
-			
-			//If it's within one space
-		} else if(Math.abs(currentMove[currentMove.length-1].x - i) <= 1 
-				&& Math.abs(currentMove[currentMove.length-1].y - j) <= 1) { //In both directions
-			selectSpace(i,j);
-			currentBoard[i][j].flip(brighten[colorTransform[currentPlayer]]);
-			currentBoard[i][j].redraw();
-		}
-		return;
-	} else if(currentBoard[i][j].player == currentPlayer) { 
-		//If we select something not in our start that is also our color
-		unselect(i,j);
 		return;
 	}
 	
+	//In the case we select something in our start
+	if(i == currentPlayer) {
+		//If it's within one space
+		} else if(Math.abs(currentMove[currentMove.length-1].x - i) <= 1 
+				&& Math.abs(currentMove[currentMove.length-1].y - j) <= 1) { //In both directions
+			console.log("within 1 space");
+			selectSpace(i,j);
+		}
+		return;
+	} 
 	
 	var conditionFunction = function(x,y) {
 		var result = (x === currentMove[currentMove.length-1].x && 
@@ -157,13 +153,9 @@ function selectBoggleSquare(i,j) {
 	}
 	
 	var actionFunction = function(x,y) { 
-		if(currentBoard[i][j].player == player[WHITE]) { //If space was not made white
-			currentBoard[i][j].flip();
+		if(currentBoard[i][j].tempPlayer == false) {
 			selectSpace(i,j);
-		} else if(currentBoard[i][j].player == currentPlayer) {
-			
 		}
-		currentBoard[i][j].redraw(); //Update the visible color 
 		return true;
 	};
 	examineNeighbors(i,j,conditionFunction, actionFunction);

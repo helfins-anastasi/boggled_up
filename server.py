@@ -96,8 +96,12 @@ def favicon_ico():
 	return f.send_file("favicon.ico")
 	
 @app.route("/client.js")
-def run():
+def client_js():
 	return f.send_file("client.js")
+
+@app.route("/board.js")
+def board_js():
+	return f.send_file("board.js")
 	
 @app.route("/test")
 def test():

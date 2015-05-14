@@ -87,7 +87,7 @@ function unselect(i,j) {
 	while(currentMove.length > 0) {
 		var popped = currentMove.pop();
 		if(popped.x != currentPlayer) {
-			popped.flip(WHITE);
+			popped.flip(popped.player);
 		} else {
 			popped.flip(colorTransform[currentPlayer]);
 		}
@@ -100,4 +100,6 @@ function unselect(i,j) {
 function selectSpace(i,j) {
 	currentMove.push(currentBoard[i][j]);
 	addLetter(currentBoard[i][j].letter);
+	currentBoard[i][j].flip(brighten[colorTransform[currentPlayer]]);
+	currentBoard[i][j].redraw();
 }
