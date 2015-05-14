@@ -3,41 +3,6 @@ RED = "rgb(230,0,0)", GREEN = "rgb(0,180,0)", WHITE = "white";
 //Also brighter versions for when the square is selected
 BRIGHT_RED = "rgb(255, 0, 0)", BRIGHT_GREEN = "rgb(0,230,0)";
 
-//A class for each space
-function Space(letter, player, x, y) {
-	this.letter = letter;
-	this.player = player;
-	this.setPlayer = function(val) {
-		this.player = val;
-		this.color = colorTransform[val];
-		this.tempPlayer = false;
-	}
-	this.color = colorTransform[player];
-	this.x = x;
-	this.y = y;
-	this.tempPlayer = false;
-	this.flipped = false;
-	this.flip = function(val) { //Bool parameter, optional (if undefined, flipped is toggled and color is assigned based on colorTransform[currentPlayer])
-		if(val !== undefined) {
-			this.flipped = val != WHITE;
-			this.color = val;
-			this.tempPlayer = player[val];
-		} else {
-			this.flipped = !this.flipped;
-			if(this.color == WHITE) {
-				this.color = brighten[colorTransform[currentPlayer]];
-				this.tempPlayer = currentPlayer;
-			} else {
-				this.color = WHITE;
-				this.player = player[WHITE];
-			}
-		}
-		return this.color != WHITE;
-	};
-	this.redraw = function() {
-		$("#"+makeId(this.x,this.y)+" > rect").css("fill", this.color);
-	}
-}
 
 currentBoard = {};
 currentBoardId = undefined;
@@ -58,12 +23,48 @@ darken[BRIGHT_GREEN] = GREEN;
 darken[BRIGHT_RED] = RED;
 
 
-player = {};
-player[WHITE] = -1;
-player[GREEN] = 0;
-player[BRIGHT_GREEN] = 0;
-player[RED] = currentBoardLength - 1;
-player[BRIGHT_RED] = currentBoardLength - 1;
+
+//A class for each space
+function Space(letter, player, x, y) {
+	this.letter = letter;
+	this.player = player;
+	this.setPlayer = function(val) {
+		this.player = val;
+		this.color = colorTransform[val];
+		this.tempPlayer = false;
+	}
+	this.color = colorTransform[player];
+	this.x = x;
+	this.y = y;
+	this.tempPlayer = false;
+	this.flipped = false;
+	this.flip = function(player) { //Bool parameter, optional (if undefined, flipped is treated as unselect)
+		if(player !== undefined) {
+			console.log("value defined: "+player);
+			this.flipped = player != -1;
+			this.color = brighten[colorTransform[player]];
+			if(player == -1) {
+				this.tempPlayer = false;
+			} else {
+				this.tempPlayer = player;
+			}
+		} else {
+			console.log("value undefined");
+			this.flipped = !this.flipped;
+			if(this.color == WHITE) {
+				this.color = brighten[colorTransform[currentPlayer]];
+			} else {
+				this.color = colorTransform[this.player];
+				this.tempPlayer = false;
+				//this.player = -1;
+			}
+		}
+		return this.color != WHITE;
+	};
+	this.redraw = function() {
+		$("#"+makeId(this.x,this.y)+" > rect").css("fill", this.color);
+	}
+}
 
 function removeLetter(letter) {
 	var currentText = $("#selectedWord")[0].innerHTML;
@@ -84,13 +85,10 @@ function makeId(i,j) {
 }
 
 function unselect(i,j) {
+	console.log("calling unselect");
 	while(currentMove.length > 0) {
 		var popped = currentMove.pop();
-		if(popped.x != currentPlayer) {
-			popped.flip(popped.player);
-		} else {
-			popped.flip(colorTransform[currentPlayer]);
-		}
+		popped.flip();
 		popped.redraw();
 		removeLetter(popped.letter);
 		if(popped == currentBoard[i][j]) break;
@@ -100,6 +98,6 @@ function unselect(i,j) {
 function selectSpace(i,j) {
 	currentMove.push(currentBoard[i][j]);
 	addLetter(currentBoard[i][j].letter);
-	currentBoard[i][j].flip(brighten[colorTransform[currentPlayer]]);
+	currentBoard[i][j].flip(currentPlayer);
 	currentBoard[i][j].redraw();
 }

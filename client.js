@@ -120,32 +120,36 @@ function examineNeighbors(i,j,conditionFunction,actionFunction) {
 
 function selectBoggleSquare(i,j) {
 	//In the case that it is already selected
-	if(currentBoard[i][j].tempPlayer != false) {
+	console.log("tempPlayer = ",currentBoard[i][j].tempPlayer);
+	if(currentBoard[i][j].tempPlayer !== false) {
+		console.log("unselecting");
 		unselect(i,j);
+		return;
 	}
 	
 	//In the case that we have no move yet
 	if(currentMove.length == 0) {
 		//If the selected square is our color, start the move
 		if(currentBoard[i][j].player == currentPlayer) {
-			if(currentBoard[i][j].tempPlayer == false) {
-				selectSpace(i,j);
-			}
+			selectSpace(i,j);
 		}
 		return;
 	}
 	
 	//In the case we select something in our start
 	if(i == currentPlayer) {
-		//If it's within one space
-		} else if(Math.abs(currentMove[currentMove.length-1].x - i) <= 1 
-				&& Math.abs(currentMove[currentMove.length-1].y - j) <= 1) { //In both directions
-			console.log("within 1 space");
-			selectSpace(i,j);
-		}
+		selectSpace(i,j);
 		return;
-	} 
-	
+		//If it's within one space
+	}
+	var lastSpace = currentMove[currentMove.length-1]; 
+	if(Math.abs(lastSpace.x - i) <= 1 
+				&& Math.abs(lastSpace.y - j) <= 1) { //In both directions
+		console.log("within 1 space");
+		selectSpace(i,j);
+		return;
+	}
+		
 	var conditionFunction = function(x,y) {
 		var result = (x === currentMove[currentMove.length-1].x && 
 					y === currentMove[currentMove.length-1].y); 

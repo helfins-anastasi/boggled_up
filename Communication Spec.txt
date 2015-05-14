@@ -30,15 +30,3 @@ uri: '/move', method: 'PUT'
 				< y = {int} #coordinates
 				< letter = {char}
 				< player = {int}
-		
-		
-		
-		#################
-		
-		
-		
-		> x = {int}
-		> y = {int} # cooridnates in board
-		> index = {int} # index in word
-		> char = {char}
-		
