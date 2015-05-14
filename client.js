@@ -17,73 +17,6 @@
 /* global RED */
 
 
-//Set up colors
-RED = "rgb(230,0,0)", GREEN = "rgb(0,180,0)", WHITE = "white";
-//Also brighter versions for when the square is selected
-BRIGHT_RED = "rgb(255, 0, 0)", BRIGHT_GREEN = "rgb(0,230,0)";
-
-//A class for each space
-function Space(letter, player, x, y) {
-	this.letter = letter;
-	this.player = player;
-	this.setPlayer = function(val) {
-		this.player = val;
-		this.color = colorTransform[val];
-		this.tempPlayer = false;
-	}
-	this.color = colorTransform[player];
-	this.x = x;
-	this.y = y;
-	this.tempPlayer = false;
-	this.flipped = false;
-	this.flip = function(val) { //Bool parameter, optional (if undefined, flipped is toggled and color is assigned based on colorTransform[currentPlayer])
-		if(val !== undefined) {
-			this.flipped = val != WHITE;
-			this.color = val;
-			this.tempPlayer = player[val];
-		} else {
-			this.flipped = !this.flipped;
-			if(this.color == WHITE) {
-				this.color = brighten[colorTransform[currentPlayer]];
-				this.tempPlayer = currentPlayer;
-			} else {
-				this.color = WHITE;
-				this.player = player[WHITE];
-			}
-		}
-		return this.color != WHITE;
-	};
-	this.redraw = function() {
-		$("#"+makeId(this.x,this.y)+" > rect").css("fill", this.color);
-	}
-}
-
-currentBoard = {};
-currentBoardId = undefined;
-currentBoardWidth = 10, currentBoardLength = 13, currentPlayer = 0;
-currentMove = [];
-
-colorTransform = {};
-colorTransform[-1] = WHITE;
-colorTransform[0] = GREEN;
-colorTransform[currentBoardLength-1] = RED;
-
-brighten = {};
-brighten[GREEN] = BRIGHT_GREEN;
-brighten[RED] = BRIGHT_RED;
-
-darken = {};
-darken[BRIGHT_GREEN] = GREEN;
-darken[BRIGHT_RED] = RED;
-
-player = {};
-player[WHITE] = -1;
-player[GREEN] = 0;
-player[BRIGHT_GREEN] = 0;
-player[RED] = currentBoardLength - 1;
-player[BRIGHT_RED] = currentBoardLength - 1;
-
-
 function getBoard(id) { //Optional parameter, if undefined then get a new board
 	function successFunction(data, textStatus, jqXHR) {
 		data = JSON.parse(data);
@@ -131,29 +64,19 @@ function go() {
 
 function goPart2() {
 	drawBoard();
-//	if(!($("body").has("#selectedWord"))) {
+	var value = $("body").has("#selectedWord");
+	console.log("Value: ");console.log(value);
+	if(!value[0]) {
+		console.log("true");
 		$("body").append('<p id="selectedWord" style="font:20px bold;display:inline;margin:-200px 20px 0 20px;"> </p>')
 		$("body").append('<button id="submitMove" onclick="submitMove();">Submit Move!</button>');
 		$("body").append('<input type="text" id="boardNumber"></input>');
 		$("body").append('<button id="load board" onclick="loadBoard();">Load board</button>');
-//	}
-}
-
-function removeLetter(letter) {
-	var currentText = $("#selectedWord")[0].innerHTML;
-	if(letter == currentText.substr(currentText.length-1)) {
-		$("#selectedWord")[0].innerHTML = currentText.substring(0, currentText.length-1);
-	} else {
-		alert("Whoa, the internal state is DEFINITELY wrong. Try reloading?");
 	}
 }
 
 function loadBoard() {
 	getBoard($("#boardNumber").val());
-}
-
-function addLetter(letter) {
-	$("#selectedWord")[0].innerHTML += letter;
 }
 
 //Draws the board
@@ -177,10 +100,6 @@ function drawBoard() {
 	$("body").append(str);
 }
 
-//Abstracts the id for each square to just its index
-function makeId(i,j) {
-	return "space"+i+"_"+j;
-}
 
 //Examines the eight neighbors of square (i,j). 
 //	If conditionFunction(x,y) is true, then actionFunction(x,y). 
@@ -197,25 +116,6 @@ function examineNeighbors(i,j,conditionFunction,actionFunction) {
 			} 
 		}
 	}
-}
-
-function unselect(i,j) {
-	while(currentMove.length > 0) {
-		var popped = currentMove.pop();
-		if(popped.x != currentPlayer) {
-			popped.flip(WHITE);
-		} else {
-			popped.flip(colorTransform[currentPlayer]);
-		}
-		popped.redraw();
-		removeLetter(popped.letter);
-		if(popped == currentBoard[i][j]) break;
-	}
-}
-
-function selectSpace(i,j) {
-	currentMove.push(currentBoard[i][j]);
-	addLetter(currentBoard[i][j].letter);
 }
 
 function selectBoggleSquare(i,j) {
