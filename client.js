@@ -65,9 +65,7 @@ function go() {
 function goPart2() {
 	drawBoard();
 	var value = $("body").has("#selectedWord");
-	console.log("Value: ");console.log(value);
 	if(!value[0]) {
-		console.log("true");
 		$("body").append('<p id="selectedWord" style="font:20px bold;display:inline;margin:-200px 20px 0 20px;"> </p>')
 		$("body").append('<button id="submitMove" onclick="submitMove();">Submit Move!</button>');
 		$("body").append('<input type="text" id="boardNumber"></input>');
@@ -120,9 +118,7 @@ function examineNeighbors(i,j,conditionFunction,actionFunction) {
 
 function selectBoggleSquare(i,j) {
 	//In the case that it is already selected
-	console.log("tempPlayer = ",currentBoard[i][j].tempPlayer);
 	if(currentBoard[i][j].tempPlayer !== false) {
-		console.log("unselecting");
 		unselect(i,j);
 		return;
 	}
@@ -145,7 +141,6 @@ function selectBoggleSquare(i,j) {
 	var lastSpace = currentMove[currentMove.length-1]; 
 	if(Math.abs(lastSpace.x - i) <= 1 
 				&& Math.abs(lastSpace.y - j) <= 1) { //In both directions
-		console.log("within 1 space");
 		selectSpace(i,j);
 		return;
 	}

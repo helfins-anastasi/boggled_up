@@ -40,7 +40,6 @@ function Space(letter, player, x, y) {
 	this.flipped = false;
 	this.flip = function(player) { //Bool parameter, optional (if undefined, flipped is treated as unselect)
 		if(player !== undefined) {
-			console.log("value defined: "+player);
 			this.flipped = player != -1;
 			this.color = brighten[colorTransform[player]];
 			if(player == -1) {
@@ -49,7 +48,6 @@ function Space(letter, player, x, y) {
 				this.tempPlayer = player;
 			}
 		} else {
-			console.log("value undefined");
 			this.flipped = !this.flipped;
 			if(this.color == WHITE) {
 				this.color = brighten[colorTransform[currentPlayer]];
@@ -85,7 +83,6 @@ function makeId(i,j) {
 }
 
 function unselect(i,j) {
-	console.log("calling unselect");
 	while(currentMove.length > 0) {
 		var popped = currentMove.pop();
 		popped.flip();
