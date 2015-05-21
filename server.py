@@ -32,48 +32,65 @@ def getBoard(width,height):
 boards = []
 		
 def printPlayerBoard(ind):
-	print ("in printPlayerBoard")
 	board = boards[ind]
-	print("got the board")
-	print("len(board) = "+len(board));
 	for i in len(board):
-		print("in outer loop "+str(i))
 		string = "";
 		for j in len(board[i]):
-			print("in inner loop "+str(j))
 			string += board[i][j]['player']
 			string += '\t'
 		print(string)
 
-#def findPath(x, y, boardId, player):
-#	myBoard = boards[boardId]
-#	stack = []
-#	while(x != player):
-#		for i in range(x-1,x+1):
-#			for j in range(y-1,y+1):
-#				if myBoard[i][j]["player"] == player:
-#					stack.append({"x":i, "y":j})
-#		if len(stack) == 0:
-#			return False
-#		nxt = stack.pop()
-#		x = nxt["x"]
-#		y = nxt["y"]
-#	return True;
+def printChanges(array):
+	for i in array:
+		print("("+str(i["x"])+", "+str(i["y"])+") '"+i["letter"]+"' player:"+str(i["player"]))
+
+def stackContains(element, array):
+	for elem in array:
+		if elem["x"] == element["x"] and elem["y"] == element["y"]:
+			return True
+
+def findPath(x, y, boardId, player):
+	stack = []
+	lookedAt = []
+	while(x != player):
+		for i in range(x-1,x+2):
+			if i < 0:
+				continue
+			elif i == len(boards[boardId]):
+				continue
+			for j in range(y-1,y+2):
+				if j < 0:
+					continue
+				elif j == len(boards[boardId][i]):
+					continue
+				#Avoid infinite loops
+				elif i == x and j == y:
+					continue
+				if boards[boardId][i][j]["player"] == player:
+					newStackItem = {"x":i, "y":j}
+					if (not stackContains(newStackItem,stack)) and (not stackContains(newStackItem, lookedAt)):
+						stack.append(newStackItem)
+		if len(stack) == 0:
+			return False
+		nxt = stack.pop()
+		x = nxt["x"]
+		y = nxt["y"]
+		lookedAt.append(nxt)
+	return True;
 
 def checkConnected(boardId):
 	result = []	
-	for i in range(boards[boardId]):
+	for i in range(len(boards[boardId])):
 		if i == 0 or i == (len(boards[boardId])-1):
 			continue
-		for j in boards[boardId][i]:
-		alkdnfawk = boards[boardId][i]
-#			if boards[boardId][i][j]["player"] != -1:
-#				print("loop")
-#				if not findPath(i, j, boardId, boards[boardId][i][j]["player"]):
-#					boards[boardId][i][j]["player"] = -1
-#					result.append({"x":i, "y":j, "letter":boards[boardId][i][j]["letter"], "player":-1})
+		for j in range(len(boards[boardId][i])):
+			if boards[boardId][i][j]["player"] == -1:
+				continue
+			if not findPath(i, j, boardId, boards[boardId][i][j]["player"]):
+				boards[boardId][i][j]["player"] = -1
+				result.append({"x":i, "y":j, "letter":boards[boardId][i][j]["letter"], "player":-1})
 	return result
-	 
+
 def makeMove(player, moves, boardId):
 	changes = []
 	for i in range(len(moves)//3):
@@ -86,9 +103,8 @@ def makeMove(player, moves, boardId):
 			
 		boards[boardId][x][y]["player"] = player
 		changes.append({"x":x, "y":y, "letter":char, "player":player})
-		changes.extend(checkConnected(boardId))
+	changes.extend(checkConnected(boardId))
 
-#		printPlayerBoard(boardId)
 	return json.dumps({"status":"success", "changes":json.dumps(changes)})	
 
 

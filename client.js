@@ -132,32 +132,13 @@ function selectBoggleSquare(i,j) {
 		return;
 	}
 	
-	//In the case we select something in our start
-	if(i == currentPlayer) {
-		selectSpace(i,j);
-		return;
-		//If it's within one space
-	}
+	//If it's within one space
 	var lastSpace = currentMove[currentMove.length-1]; 
 	if(Math.abs(lastSpace.x - i) <= 1 
 				&& Math.abs(lastSpace.y - j) <= 1) { //In both directions
 		selectSpace(i,j);
 		return;
 	}
-		
-	var conditionFunction = function(x,y) {
-		var result = (x === currentMove[currentMove.length-1].x && 
-					y === currentMove[currentMove.length-1].y); 
-		return result;
-	}
-	
-	var actionFunction = function(x,y) { 
-		if(currentBoard[i][j].tempPlayer == false) {
-			selectSpace(i,j);
-		}
-		return true;
-	};
-	examineNeighbors(i,j,conditionFunction, actionFunction);
 }
 
 function changePlayer() {
