@@ -23,6 +23,7 @@ function getBoard(id) { //Optional parameter, if undefined then get a new board
 		
 		currentBoardId = data['id'];
 		var tempBoard = data['board'];
+		currentPlayer = data['player'];
 		
 		for(var i = 0; i < currentBoardLength; i++) {
 			if(!tempBoard[i]) { console.log("tempBoard["+i+"] DNE"); continue; }
@@ -142,10 +143,12 @@ function selectBoggleSquare(i,j) {
 	}
 }
 
-function changePlayer() {
+function changePlayer(player) {
 	currentMove = [];
 	$("#selectedWord")[0].innerHTML = "";
-	if(currentPlayer === 0) {
+	if(player) {
+		currentPlayer = player;
+	} else if(currentPlayer === 0) {
 		currentPlayer = currentBoardLength-1;
 	} else {
 		currentPlayer = 0;
@@ -186,7 +189,7 @@ function submitMove() {
 			currentBoard[x][y].setPlayer(player);
 			currentBoard[x][y].redraw();
 		}
-		changePlayer();
+		changePlayer(data.player);
 	}
 	var dataObj = {};
 	dataObj["moves"] = JSON.stringify(encodeMove(currentMove));
