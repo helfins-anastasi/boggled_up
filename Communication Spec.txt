@@ -11,6 +11,7 @@ uri: '/', method: 'PUT'
 			< letter = {char}
 			< player = {int, default = -1}
 		< id = {int}
+		< player = {int} #player whose turn is next
 			
 uri: '/move', method: 'PUT'
 	> id = {int}
@@ -22,7 +23,7 @@ uri: '/move', method: 'PUT'
 	< JSON blob
 		~ status = "failed":
 			< error = {string}
-			< x = {int}
+			< x = {int} #where the error occurred
 			< y = {int}
 		~ status = "success":
 			< changes = {JSON blob array}
@@ -30,3 +31,4 @@ uri: '/move', method: 'PUT'
 				< y = {int} #coordinates
 				< letter = {char}
 				< player = {int}
+			< player = {int} #player whose turn is next

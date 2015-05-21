@@ -80,6 +80,7 @@ function loadBoard() {
 //Draws the board
 function drawBoard() {
 	var size = 30;
+	$("#svg").remove();
 	var str = '<svg id="svg" width="'+currentBoardWidth*size+'" height="'+currentBoardLength*size+'">';
 	for(var i = 0; i < currentBoardLength; i++) {
 		for(var j = 0; j < currentBoardWidth; j++) {
@@ -95,7 +96,7 @@ function drawBoard() {
 		}
 	}
 	str += '</svg>';
-	$("body").append(str);
+	$("h1").after(str);
 }
 
 
