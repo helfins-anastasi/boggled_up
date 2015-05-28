@@ -173,6 +173,7 @@ function changePlayer(player) {
 
 function encodeMove(moveList) {
 	var result = [];
+	if(moveList.length == 0) return false;
 	for(var i in moveList) {
 		var mv = moveList[i];
 		result.push(mv.x);
@@ -207,7 +208,12 @@ function submitMove() {
 		changePlayer(data.player);
 	}
 	var dataObj = {};
-	dataObj["moves"] = JSON.stringify(encodeMove(currentMove));
+	var encoded = encodeMove(currentMove);
+	if(encoded) { 
+		dataObj["moves"] = JSON.stringify(encoded);
+	} else { 
+		return;
+	}
 	dataObj["player"] = currentPlayer;
 	dataObj["id"] = currentBoardId;
 	$.ajax("/move", {data: dataObj, method: "PUT",
