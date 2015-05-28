@@ -116,7 +116,7 @@ function drawBoard() {
 	}
 	str += '</svg>';
 	$("h1").after(str);
-//	disableSelection($("#svg")[0]);
+	disableSelection($("#svg")[0]);
 }
 
 
@@ -227,7 +227,7 @@ function submitMove() {
 						success: successFunction});
 }
 
-/*function disableSelection(element) {
+function disableSelection(element) {
 	if (typeof element.onselectstart != 'undefined') {
 		element.onselectstart = function() { return false; };
 	} else if (typeof element.style.MozUserSelect != 'undefined') {
@@ -235,4 +235,4 @@ function submitMove() {
 	} else {
 		element.onmousedown = function() { return false; };
 	}
-}*/
+}
