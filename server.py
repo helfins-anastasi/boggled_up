@@ -10,6 +10,7 @@ class Game:
 		self.width = width
 		self.height = height
 		self.currentPlayer = 0;
+		self.moves = []
 		self.id = id
 		for i in range(height):
 			self.board.append([])
@@ -21,12 +22,13 @@ class Game:
 				self.board[i].append({"x":i,"y":j,"player":temp,"letter":randomLetter()})
 				
 	def __str__(self):
+		string = "";
 		for i in range(self.height):
-			string = "";
 			for j in range(self.width):
 				string += board[i][j]['player']
 				string += '\t'
-			print(string)
+			string += '\n'
+		return string
 	
 	def findPath(self, x, y):
 		player = self.board[x][y]["player"]
@@ -73,6 +75,7 @@ class Game:
 		return result
 	
 	def makeMove(self, player, moves):
+		word = ""
 		changes = []
 		for i in range(len(moves)//3):
 			x = int(moves[3*i])
@@ -81,14 +84,19 @@ class Game:
 			if(self.board[x][y]["letter"] != char):
 				print("makeMove() failed")
 				return json.dumps({"status":"failed", "error": "board does not match", "x":x, "y":y})
-				
+			word += char
 			self.board[x][y]["player"] = player
 			changes.append({"x":x, "y":y, "letter":char, "player":player})
 		changes.extend(self.checkConnected())
-		return json.dumps({"status":"success", "changes":json.dumps(changes)})
+		self.moves.append({"word":word, "player":self.currentPlayer})
+		if (self.currentPlayer == 0):
+			self.currentPlayer = self.height - 1
+		else:
+			self.currentPlayer = 0
+		return json.dumps({"status":"success", "changes":json.dumps(changes), "player":self.currentPlayer})
 
 	def encode(self):
-		return json.dumps({"board":self.board, "id":self.id, "player":self.currentPlayer})
+		return json.dumps({"board":self.board, "id":self.id, "player":self.currentPlayer, "previousMoves":self.moves})
 	
 
 #Currently based on frequency of letters in the english language, but can be modified as needed.	
@@ -130,7 +138,7 @@ def mainPage():
 			return newGame.encode()
 		elif kind == 'refresh':
 			index = f.request.form['id']
-			return json.dumps({"board":games[int(index)], "id":index})
+			return games[int(index)].encode()
 	else:
 		return f.send_file("index.html")
 

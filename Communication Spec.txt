@@ -12,6 +12,9 @@ uri: '/', method: 'PUT'
 			< player = {int, default = -1}
 		< id = {int}
 		< player = {int} #player whose turn is next
+		< previousMoves = {array}
+			< word = {string}
+			< player = {int} #player who played that word
 			
 uri: '/move', method: 'PUT'
 	> id = {int}

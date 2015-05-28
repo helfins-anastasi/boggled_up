@@ -23,7 +23,8 @@ function getBoard(id) { //Optional parameter, if undefined then get a new board
 		
 		currentBoardId = data['id'];
 		var tempBoard = data['board'];
-		currentPlayer = data['player'];
+		changePlayer(data['player']);
+		appendMoves(data['previousMoves']);
 		
 		for(var i = 0; i < currentBoardLength; i++) {
 			if(!tempBoard[i]) { console.log("tempBoard["+i+"] DNE"); continue; }
@@ -56,22 +57,39 @@ function getBoard(id) { //Optional parameter, if undefined then get a new board
 					success: successFunction});
 }
 
+function appendMoves(moves) {
+	var result = "";
+	for(var i in moves) {
+		console.log("moves[i]:");
+		console.log(moves[i]);
+		console.log("moves[i].word:");
+		console.log(moves[i].word);
+		result += '<p style="color:'+colorTransform[moves[i].player]+'">' + moves[i].word + "</p>";
+	}
+	$("#moves")[0].innerHTML = (result);
+}
+
+function appendWord() {
+	var word = "";
+	for(var i in currentMove) {
+		word += currentMove[i].letter;
+	}
+	$("#moves")[0].innerHTML += '<p style="color:'+colorTransform[currentPlayer]+'">'+word+"</p>";
+}
+
 //Place for setup that has to be done after page loads
 function go() {
-	//currentBoard = getBoard();
 	getBoard();
 	console.log("Loading...");
+	$("body").append('<div id="moves" style="font:20px bold;dispaly:inline;"></div>')
+	$("body").append('<p id="selectedWord" style="font:20px bold;display:inline;margin:-200px 20px 0 20px;"> </p>')
+	$("body").append('<button id="submitMove" onclick="submitMove();">Submit Move!</button>');
+	$("body").append('<input type="text" id="boardNumber"></input>');
+	$("body").append('<button id="load board" onclick="loadBoard();">Load board</button>');
 }
 
 function goPart2() {
 	drawBoard();
-	var value = $("body").has("#selectedWord");
-	if(!value[0]) {
-		$("body").append('<p id="selectedWord" style="font:20px bold;display:inline;margin:-200px 20px 0 20px;"> </p>')
-		$("body").append('<button id="submitMove" onclick="submitMove();">Submit Move!</button>');
-		$("body").append('<input type="text" id="boardNumber"></input>');
-		$("body").append('<button id="load board" onclick="loadBoard();">Load board</button>');
-	}
 }
 
 function loadBoard() {
@@ -82,7 +100,7 @@ function loadBoard() {
 function drawBoard() {
 	var size = 30;
 	$("#svg").remove();
-	var str = '<svg id="svg" width="'+currentBoardWidth*size+'" height="'+currentBoardLength*size+'">';
+	var str = '<svg id="svg" style="float:left;padding-right:20px;" width="'+currentBoardWidth*size+'" height="'+currentBoardLength*size+'">';
 	for(var i = 0; i < currentBoardLength; i++) {
 		for(var j = 0; j < currentBoardWidth; j++) {
 			str+='<g id="'+makeId(i,j)+'">';
@@ -146,13 +164,11 @@ function selectBoggleSquare(i,j) {
 function changePlayer(player) {
 	currentMove = [];
 	$("#selectedWord")[0].innerHTML = "";
-	if(player) {
-		currentPlayer = player;
-	} else if(currentPlayer === 0) {
-		currentPlayer = currentBoardLength-1;
-	} else {
-		currentPlayer = 0;
+	if(player === undefined) {
+		console.log("ERROR: invalid value for player");
 	}
+	currentPlayer = player;
+	console.log("in changePlayer() - current player is "+currentPlayer);
 }
 
 function encodeMove(moveList) {
@@ -162,8 +178,6 @@ function encodeMove(moveList) {
 		result.push(mv.x);
 		result.push(mv.y);
 		result.push(mv.letter);
-		//var item = {x:mv.x, y:mv.y, index:i, char:mv.letter};
-		//result.push(item);
 	}
 	return result;
 }
@@ -176,6 +190,7 @@ function submitMove() {
 			return;
 		}
 		data.changes = JSON.parse(data.changes);
+		appendWord();
 		for(var i in data.changes) {
 			var x = data.changes[i].x;
 			var y = data.changes[i].y;
