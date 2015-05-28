@@ -9,6 +9,7 @@ class Game:
 		self.board = []
 		self.width = width
 		self.height = height
+		self.status = "success"
 		self.currentPlayer = 0
 		self.wordList = []
 		self.moves = []
@@ -78,30 +79,43 @@ class Game:
 	def makeMove(self, player, moves):
 		word = ""
 		changes = []
+		hasWon = False
 		for i in range(len(moves)//3):
 			x = int(moves[3*i])
 			y = int(moves[3*i+1])
 			char = moves[3*i+2]
 			if(self.board[x][y]["letter"] != char):
 				print("makeMove() failed")
-				return json.dumps({"status":"failed", "error": "board does not match", "x":x, "y":y})
+				self.status = "failed"
+				return json.dumps({"status":self.status, "error": "board does not match", "x":x, "y":y})
 			word += char
 			self.board[x][y]["player"] = player
 			changes.append({"x":x, "y":y, "letter":char, "player":player})
+			if (player == 0 and x == self.height - 1) or (player == self.height - 1 and x == 0):
+				hasWon = True;
+			
 		if word in self.wordList:
 			return json.dumps({"status":"failed","error":"repeat","word":word})
 		else:
 			self.wordList.append(word)
+
+		#Check here if valid word
+		
 		changes.extend(self.checkConnected())
 		self.moves.append({"word":word, "player":self.currentPlayer})
-		if (self.currentPlayer == 0):
+		
+		if hasWon:
+			self.status = "win"
+			self.currentPlayer = player
+		elif (self.currentPlayer == 0):
 			self.currentPlayer = self.height - 1
 		else:
 			self.currentPlayer = 0
-		return json.dumps({"status":"success", "changes":json.dumps(changes), "player":self.currentPlayer})
+		
+		return json.dumps({"status":self.status, "changes":json.dumps(changes), "player":self.currentPlayer})
 
 	def encode(self):
-		return json.dumps({"board":self.board, "id":self.id, "player":self.currentPlayer, "previousMoves":self.moves})
+		return json.dumps({"board":self.board, "status":self.status, "id":self.id, "player":self.currentPlayer, "previousMoves":self.moves})
 	
 
 #Currently based on frequency of letters in the english language, but can be modified as needed.	

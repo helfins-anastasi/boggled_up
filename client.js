@@ -195,6 +195,8 @@ function submitMove() {
 			}
 			alert("We're sorry, something has gone wrong. Please reload the page.");
 			return;
+		} else if(data.status == "win") {
+			alert((data.player === 0 ? "Green" : "Red") + " player won!");
 		}
 		data.changes = JSON.parse(data.changes);
 		appendWord();

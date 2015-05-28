@@ -1,21 +1,22 @@
 Communication Spec
 ==================
 uri: '/', method: 'PUT'
-	type = "new"
+	~> type = "new"
 		> width = {int}
 		> height = {int}
-	type = "refresh"
+	~> type = "refresh"
 		> id = {int}
 	< JSON blob 
+		< status = {"success", "failed", "win"}
 		< board = {2D array}
 			< letter = {char}
 			< player = {int, default = -1}
 		< id = {int}
-		< player = {int} #player whose turn is next
+		< player = {int} #player whose turn is next (or who won)
 		< previousMoves = {array}
 			< word = {string}
 			< player = {int} #player who played that word
-			
+		
 uri: '/move', method: 'PUT'
 	> id = {int}
 	> player = {int}
@@ -24,16 +25,18 @@ uri: '/move', method: 'PUT'
 		> moves[3*i+1] = y = {int} #coordinates in board
 		> moves[3*i+2] = char = {char}
 	< JSON blob
-		~ status = "failed":
-			~ error = "repeat"
+		<~ status = "failed":
+			<~ error = "repeat"
 				< word = {string} #the word that was repeated
 			< error = {string} #an error message
 				< x = {int}
 				< y = {int} #where the error occurred
-		~ status = "success":
+		<~ status = "success":
 			< changes = {JSON blob array}
 				< x = {int}
 				< y = {int} #coordinates
 				< letter = {char}
 				< player = {int}
 			< player = {int} #player whose turn is next
+		<~ status = "win":
+			< player = {int} #player who won
