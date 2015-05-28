@@ -9,7 +9,8 @@ class Game:
 		self.board = []
 		self.width = width
 		self.height = height
-		self.currentPlayer = 0;
+		self.currentPlayer = 0
+		self.wordList = []
 		self.moves = []
 		self.id = id
 		for i in range(height):
@@ -87,6 +88,10 @@ class Game:
 			word += char
 			self.board[x][y]["player"] = player
 			changes.append({"x":x, "y":y, "letter":char, "player":player})
+		if word in self.wordList:
+			return json.dumps({"status":"failed","error":"repeat","word":word})
+		else:
+			self.wordList.append(word)
 		changes.extend(self.checkConnected())
 		self.moves.append({"word":word, "player":self.currentPlayer})
 		if (self.currentPlayer == 0):

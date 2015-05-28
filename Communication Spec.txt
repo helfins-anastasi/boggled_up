@@ -25,9 +25,11 @@ uri: '/move', method: 'PUT'
 		> moves[3*i+2] = char = {char}
 	< JSON blob
 		~ status = "failed":
-			< error = {string}
-			< x = {int} #where the error occurred
-			< y = {int}
+			~ error = "repeat"
+				< word = {string} #the word that was repeated
+			< error = {string} #an error message
+				< x = {int}
+				< y = {int} #where the error occurred
 		~ status = "success":
 			< changes = {JSON blob array}
 				< x = {int}

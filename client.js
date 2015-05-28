@@ -116,6 +116,7 @@ function drawBoard() {
 	}
 	str += '</svg>';
 	$("h1").after(str);
+//	disableSelection($("#svg")[0]);
 }
 
 
@@ -187,6 +188,11 @@ function submitMove() {
 	function successFunction(data, textStatus, jqXHR) {
 		data = JSON.parse(data);
 		if(data.status == "failed") {
+			if(data.error == "repeat") {
+				alert('The word "'+data.word+'" has already been played! Please try a different word.');
+				unselect(currentMove[0].x, currentMove[0].y);
+				return;
+			}
 			alert("We're sorry, something has gone wrong. Please reload the page.");
 			return;
 		}
@@ -220,3 +226,13 @@ function submitMove() {
 						type: "PUT", 
 						success: successFunction});
 }
+
+/*function disableSelection(element) {
+	if (typeof element.onselectstart != 'undefined') {
+		element.onselectstart = function() { return false; };
+	} else if (typeof element.style.MozUserSelect != 'undefined') {
+		element.style.MozUserSelect = 'none';
+	} else {
+		element.onmousedown = function() { return false; };
+	}
+}*/
