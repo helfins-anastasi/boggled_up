@@ -1,6 +1,28 @@
 import flask as f
 import random as r
 import json
+from collections import defaultdict
+
+class TrieNode:
+	def __init__(self):
+		self.children = defaultdict(TrieNode)
+		self.word = False
+					
+	def add_word(self, word): #this function behaves as if this is the root node
+		if len(word) == 0:
+			self.word = True
+			return
+		letter = word[0]
+		self.children[letter].add_word(word[1:])
+	
+
+dictionary = open("Dictionary.txt", 'r')
+root = TrieNode()
+
+for line in dictionary:
+	root.add_word(line.strip())
+
+#trie_initialized = False
 
 app = f.Flask(__name__)
 
@@ -80,6 +102,7 @@ class Game:
 		word = ""
 		changes = []
 		hasWon = False
+		current_node = root
 		for i in range(len(moves)//3):
 			x = int(moves[3*i])
 			y = int(moves[3*i+1])
@@ -88,19 +111,23 @@ class Game:
 				print("makeMove() failed")
 				self.status = "failed"
 				return json.dumps({"status":self.status, "error": "board does not match", "x":x, "y":y})
+			
+			current_node = current_node.children[char]
+			
 			word += char
 			self.board[x][y]["player"] = player
 			changes.append({"x":x, "y":y, "letter":char, "player":player})
 			if (player == 0 and x == self.height - 1) or (player == self.height - 1 and x == 0):
-				hasWon = True;
-			
+				hasWon = True;	
+		
+		if not current_node.word:
+			return json.dumps({"status":"failed","error":"not a word", "word":word})
+		
 		if word in self.wordList:
 			return json.dumps({"status":"failed","error":"repeat","word":word})
 		else:
 			self.wordList.append(word)
 
-		#Check here if valid word
-		
 		changes.extend(self.checkConnected())
 		self.moves.append({"word":word, "player":self.currentPlayer})
 		
@@ -145,7 +172,7 @@ def stackContains(element, array):
 
 
 
-@app.route("/", methods=['GET', 'PUT'])
+@app.route("/", methods=['GET', 'PUT', 'POST'])
 def mainPage():
 	if f.request.method == 'PUT':
 		kind = f.request.form['type']

@@ -169,7 +169,6 @@ function changePlayer(player) {
 		console.log("ERROR: invalid value for player");
 	}
 	currentPlayer = player;
-	console.log("in changePlayer() - current player is "+currentPlayer);
 }
 
 function encodeMove(moveList) {
@@ -192,8 +191,12 @@ function submitMove() {
 				alert('The word "'+data.word+'" has already been played! Please try a different word.');
 				unselect(currentMove[0].x, currentMove[0].y);
 				return;
+			} else if(data.error == "not a word") {
+				alert('"'+data.word+'" is not a word.');
+				unselect(currentMove[0].x, currentMove[0].y);
+				return;
 			}
-			alert("We're sorry, something has gone wrong. Please reload the page.");
+			alert("We're sorry, "+data.error+". Please reload the page.");
 			return;
 		} else if(data.status == "win") {
 			alert((data.player === 0 ? "Green" : "Red") + " player won!");
