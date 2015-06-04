@@ -80,7 +80,12 @@ function appendWord() {
 
 //Place for setup that has to be done after page loads
 function go() {
-	getBoard();
+	var game = prompt("Enter your game number: ", "New Game");
+	if(typeof(game) == "number") {
+		getBoard(game);
+	} else {
+		getBoard();
+	}
 	console.log("Loading...");
 	$("body").append('<div id="moves" style="font:20px bold;dispaly:inline;"></div>')
 	$("body").append('<p id="selectedWord" style="font:20px bold;display:inline;margin:-200px 20px 0 20px;"> </p>')
