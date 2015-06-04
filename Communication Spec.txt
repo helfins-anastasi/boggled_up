@@ -41,6 +41,8 @@ uri: '/board/<number>', method: 'PUT'
 				< word = {string} #the word that was repeated
 			<~ error = "not a word"
 				< word = {string} #the "word" that was not actually a word
+			<~ error = "wrong player"
+				< player = {int} #the player whose turn it should be
 			< error = {string} #an error message
 				< x = {int}
 				< y = {int} #where the error occurred

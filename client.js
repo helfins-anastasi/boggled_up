@@ -1,3 +1,4 @@
+/* global currentGameCount */
 /* global player */
 /* global currentBoardId */
 /* global darken */
@@ -47,7 +48,7 @@ function getBoard(id) { //Optional parameter, if undefined then get a new board
 	}
 	
 	var dataObj = {};
-	if(id) {
+	if(id != undefined) {
 		$.ajax("/board/"+id, {method: "GET", type: "GET", 
 					success: successFunction});
 	} else {
@@ -78,14 +79,26 @@ function appendWord() {
 	$("#moves")[0].innerHTML += '<p style="color:'+colorTransform[currentPlayer]+'">'+word+"</p>";
 }
 
+function getGameCount() {
+	$.ajax("/board", {method: "GET", type: "GET", 
+			success: function(data) {
+				data.count;
+				var game = prompt("Enter your game number: ", "New Game");
+				var value = Number(game);
+				if(value == "0" || value) {
+					console.log("found a number: "+value);
+					getBoard(value);
+				} else {
+					console.log(game + "is NaN (" + value + ")");
+					getBoard();
+				}
+			}
+		});
+}
+
 //Place for setup that has to be done after page loads
 function go() {
-	var game = prompt("Enter your game number: ", "New Game");
-	if(typeof(game) == "number") {
-		getBoard(game);
-	} else {
-		getBoard();
-	}
+	getGameCount();
 	console.log("Loading...");
 	$("body").append('<div id="moves" style="font:20px bold;dispaly:inline;"></div>')
 	$("body").append('<p id="selectedWord" style="font:20px bold;display:inline;margin:-200px 20px 0 20px;"> </p>')
@@ -200,11 +213,15 @@ function submitMove() {
 		if(data.status == "failed") {
 			if(data.error == "repeat") {
 				alert('The word "'+data.word+'" has already been played! Please try a different word.');
-				unselect(currentMove[0].x, currentMove[0].y);
+				if(currentMove[0]) unselect(currentMove[0].x, currentMove[0].y);
 				return;
 			} else if(data.error == "not a word") {
 				alert('"'+data.word+'" is not a word.');
-				unselect(currentMove[0].x, currentMove[0].y);
+				if(currentMove[0]) unselect(currentMove[0].x, currentMove[0].y);
+				return;
+			} else if (data.error == "wrong player") {
+				alert('It is '+(data.player == 0 ? "green" : "red") + ' player\'s turn');
+				if(currentMove[0]) unselect(currentMove[0].x, currentMove[0].y);
 				return;
 			}
 			alert("We're sorry, "+data.error+". Please reload the page.");

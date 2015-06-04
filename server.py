@@ -106,6 +106,10 @@ class Game:
 		return result
 	
 	def makeMove(self, player, moves):
+		if not (player == self.currentPlayer):
+			self.status = "failed"
+			return json.dumps({"status": self.status, "error": "wrong player", "player":self.currentPlayer})
+		self.status = "success"
 		word = ""
 		changes = []
 		crossings = []
@@ -130,10 +134,12 @@ class Game:
 				hasWon = True;	
 
 		if not current_node.word:
-			return json.dumps({"status":"failed","error":"not a word", "word":word})
+			self.status = "failed"
+			return json.dumps({"status":self.status,"error":"not a word", "word":word})
 		
 		if word in self.wordList:
-			return json.dumps({"status":"failed","error":"repeat","word":word})
+			self.status = "failed"
+			return json.dumps({"status":self.status,"error":"repeat","word":word})
 		else:
 			self.wordList.append(word)
 
