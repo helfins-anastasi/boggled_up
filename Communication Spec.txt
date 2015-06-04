@@ -1,11 +1,8 @@
 Communication Spec
 ==================
-uri: '/', method: 'PUT'
-	~> type = "new"
-		> width = {int}
-		> height = {int}
-	~> type = "refresh"
-		> id = {int}
+uri: '/board', method: 'POST'
+	> width = {int}
+	> height = {int}
 	< JSON blob 
 		< status = {"success", "failed", "win"}
 		< board = {2D array}
@@ -16,9 +13,23 @@ uri: '/', method: 'PUT'
 		< previousMoves = {array}
 			< word = {string}
 			< player = {int} #player who played that word
-		
-uri: '/move', method: 'PUT'
-	> id = {int}
+
+uri: '/board', method: 'GET'
+	< count = {int}
+
+uri: '/board/<number>', method: 'GET'
+	< JSON blob 
+		< status = {"success", "failed", "win"}
+		< board = {2D array}
+			< letter = {char}
+			< player = {int, default = -1}
+		< id = {int}
+		< player = {int} #player whose turn is next (or who won)
+		< previousMoves = {array}
+			< word = {string}
+			< player = {int} #player who played that word
+
+uri: '/board/<number>', method: 'PUT'
 	> player = {int}
 	> moves = {Array}
 		> moves[3 * i] = x = {int} 

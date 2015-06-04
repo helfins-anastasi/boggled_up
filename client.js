@@ -20,11 +20,14 @@
 function getBoard(id) { //Optional parameter, if undefined then get a new board
 	function successFunction(data, textStatus, jqXHR) {
 		data = JSON.parse(data);
-		
+
 		currentBoardId = data['id'];
 		var tempBoard = data['board'];
 		changePlayer(data['player']);
 		appendMoves(data['previousMoves']);
+
+		console.log("data");
+		console.log(data);
 		
 		for(var i = 0; i < currentBoardLength; i++) {
 			if(!tempBoard[i]) { console.log("tempBoard["+i+"] DNE"); continue; }
@@ -45,16 +48,14 @@ function getBoard(id) { //Optional parameter, if undefined then get a new board
 	
 	var dataObj = {};
 	if(id) {
-		dataObj.type = "refresh";
-		dataObj.id = id;
+		$.ajax("/board/"+id, {method: "GET", type: "GET", 
+					success: successFunction});
 	} else {
-		dataObj.type = "new";	
 		dataObj.width = currentBoardWidth;
 		dataObj.height = currentBoardLength;
+		$.ajax("/board", {data: dataObj, method: "POST", type: "POST", 
+				success: successFunction});
 	}
-	
-	$.ajax("/", {data: dataObj, method: "PUT", type: "PUT", 
-					success: successFunction});
 }
 
 function appendMoves(moves) {
@@ -186,6 +187,11 @@ function encodeMove(moveList) {
 function submitMove() {
 	function successFunction(data, textStatus, jqXHR) {
 		data = JSON.parse(data);
+		
+		console.log("data");
+		console.log(data);
+
+		
 		if(data.status == "failed") {
 			if(data.error == "repeat") {
 				alert('The word "'+data.word+'" has already been played! Please try a different word.');
@@ -226,10 +232,8 @@ function submitMove() {
 		return;
 	}
 	dataObj["player"] = currentPlayer;
-	dataObj["id"] = currentBoardId;
-	$.ajax("/move", {data: dataObj, method: "PUT",
-						type: "PUT", 
-						success: successFunction});
+	$.ajax("/board/"+currentBoardId, {data: dataObj, method: "PUT", type: "PUT", 
+			success: successFunction});
 }
 
 function disableSelection(element) {

@@ -22,7 +22,7 @@ root = TrieNode()
 for line in dictionary:
 	root.add_word(line.strip())
 
-#trie_initialized = False
+dictionary.close()
 
 app = f.Flask(__name__)
 
@@ -44,16 +44,16 @@ class Game:
 				temp = -1
 			for j in range(width):
 				self.board[i].append({"x":i,"y":j,"player":temp,"letter":randomLetter()})
-				
+			
 	def __str__(self):
 		string = "";
 		for i in range(self.height):
 			for j in range(self.width):
-				string += board[i][j]['player']
+				string += str(self.board[i][j]['player'])
 				string += '\t'
 			string += '\n'
 		return string
-	
+
 	def findPath(self, x, y):
 		player = self.board[x][y]["player"]
 		stack = []
@@ -85,22 +85,30 @@ class Game:
 		return True;
 
 	
-	def checkConnected(self):
+	def checkConnected(self, location, player):
 		result = []	
-		for i in range(self.height):
-			if i == 0 or i == self.height-1:
-				continue
-			for j in range(self.width):
-				if self.board[i][j]["player"] == -1:
+		stack = []
+		while len(stack) > 0:
+			elem = stack.pop()
+			x = elem[0]
+			y = elem[1]
+			for i in range(x-1, x+2):
+				if i <= 0 or i >= self.height-1:
 					continue
-				if not self.findPath(i, j):
-					self.board[i][j]["player"] = -1
-					result.append({"x":i, "y":j, "letter":self.board[i][j]["letter"], "player":-1})
+				for j in range(y-1, y+2):
+					if j < 0 or j > self.width - 1:
+						continue
+					if self.board[i][j]["player"] != player:
+						continue
+					stack.append((i,j))
+			if not self.findPath(x, y):
+				result.append({"x":x, "y":y, "letter":self.board[x][y]["letter"], "player":-1})
 		return result
 	
 	def makeMove(self, player, moves):
 		word = ""
 		changes = []
+		crossings = []
 		hasWon = False
 		current_node = root
 		for i in range(len(moves)//3):
@@ -111,15 +119,16 @@ class Game:
 				print("makeMove() failed")
 				self.status = "failed"
 				return json.dumps({"status":self.status, "error": "board does not match", "x":x, "y":y})
-			
+
 			current_node = current_node.children[char]
-			
+
 			word += char
-			self.board[x][y]["player"] = player
+			if self.board[x][y]["player"] != -1 and self.board[x][y]["player"] != player:
+				crossings.append((x,y))
 			changes.append({"x":x, "y":y, "letter":char, "player":player})
 			if (player == 0 and x == self.height - 1) or (player == self.height - 1 and x == 0):
 				hasWon = True;	
-		
+
 		if not current_node.word:
 			return json.dumps({"status":"failed","error":"not a word", "word":word})
 		
@@ -128,8 +137,17 @@ class Game:
 		else:
 			self.wordList.append(word)
 
-		changes.extend(self.checkConnected())
+		if player == 0:
+			otherPlayer = self.height - 1
+		else:
+			otherPlayer = 0
+			
+		for cross in crossings:
+			changes.extend(self.checkConnected(cross, otherPlayer))
 		self.moves.append({"word":word, "player":self.currentPlayer})
+
+		for change in changes:
+			self.board[change["x"]][change["y"]]["player"] = change["player"]
 		
 		if hasWon:
 			self.status = "win"
@@ -172,31 +190,29 @@ def stackContains(element, array):
 
 
 
-@app.route("/", methods=['GET', 'PUT', 'POST'])
+@app.route("/", methods=['GET'])
 def mainPage():
-	if f.request.method == 'PUT':
-		kind = f.request.form['type']
-		if kind == 'new':
-			width = f.request.form['width']
-			height = f.request.form['height']
-			newGame = Game(int(width), int(height), len(games))
-			games.append(newGame)
-			return newGame.encode()
-		elif kind == 'refresh':
-			index = f.request.form['id']
-			return games[int(index)].encode()
-	else:
-		return f.send_file("index.html")
+	return f.send_file("index.html")
 
-@app.route("/move", methods=['GET','PUT'])
-def _makeMove():
-	if(f.request.method == 'PUT'):
-		idVar = f.request.form['id']
+@app.route("/board", methods=['GET', 'POST'])
+def _board():
+	if f.request.method == 'GET':
+		return json.dumps({"count":len(games)})
+	else:
+		width = f.request.form['width']
+		height = f.request.form['height']
+		newGame = Game(int(width), int(height), len(games))
+		games.append(newGame)
+		return newGame.encode()
+
+@app.route("/board/<int:number>", methods=['GET','PUT'])
+def _board_(number):
+	if f.request.method == 'GET':
+		return games[number].encode()
+	else:
 		movesVar = f.request.form['moves']
 		playerVar = f.request.form['player']
-		return games[int(idVar)].makeMove(int(playerVar), json.loads(movesVar))
-	else:
-		return f.send_file("index.html")
+		return games[number].makeMove(int(playerVar), json.loads(movesVar))
 
 @app.route("/favicon.ico")
 def favicon_ico():
